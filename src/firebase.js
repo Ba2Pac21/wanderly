@@ -169,3 +169,59 @@ export async function deletePost(postId) {
     return true;
   } catch { return false; }
 }
+
+// --- DM / MESSAGING ---
+export async function getOrCreateConversation(uid1, uid2) {
+  try {
+    const convId = [uid1, uid2].sort().join("_");
+    const convRef = doc(db, "conversations", convId);
+    const snap = await getDoc(convRef);
+    if (!snap.exists()) {
+      await setDoc(convRef, { participants: [uid1, uid2], createdAt: serverTimestamp(), lastMessage: null, lastMessageAt: serverTimestamp() });
+    }
+    return convId;
+  } catch { return null; }
+}
+
+export async function sendMessage(convId, { uid, text }) {
+  try {
+    await addDoc(collection(db, "conversations", convId, "messages"), {
+      uid, text, createdAt: serverTimestamp()
+    });
+    await updateDoc(doc(db, "conversations", convId), { lastMessage: text, lastMessageAt: serverTimestamp() });
+    return true;
+  } catch { return false; }
+}
+
+export async function getMessages(convId, maxMessages = 50) {
+  try {
+    const q = query(collection(db, "conversations", convId, "messages"), orderBy("createdAt", "asc"), limit(maxMessages));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch { return []; }
+}
+
+export async function getConversations(uid) {
+  try {
+    const q = query(collection(db, "conversations"), where("participants", "array-contains", uid), orderBy("lastMessageAt", "desc"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch { return []; }
+}
+
+export async function getUserProfileByUsername(username) {
+  try {
+    const q = query(collection(db, "users"), where("usernameLower", "==", username.toLowerCase()));
+    const snap = await getDocs(q);
+    if (!snap.empty) return { id: snap.docs[0].id, ...snap.docs[0].data() };
+    return null;
+  } catch { return null; }
+}
+
+export async function getUserPosts(uid, maxPosts = 20) {
+  try {
+    const q = query(collection(db, "posts"), where("uid", "==", uid), orderBy("createdAt", "desc"), limit(maxPosts));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch { return []; }
+}

@@ -48,3 +48,60 @@ export function tf(lang, path, vars) {
   }
   return str;
 }
+
+// Additional translations for DM, Profile, Notifications
+export function addTranslations(lang) {
+  return {
+    dm: lang === "en" ? {
+      title: "Messages",
+      noConversations: "No messages yet",
+      startChat: "Start a conversation from someone's profile!",
+      typeMessage: "Type a message...",
+      send: "Send",
+      you: "You",
+      online: "Online",
+      back: "← Back"
+    } : {
+      title: "Mesajlar",
+      noConversations: "Henüz mesaj yok",
+      startChat: "Birinin profilinden sohbet başlat!",
+      typeMessage: "Mesaj yaz...",
+      send: "Gönder",
+      you: "Sen",
+      online: "Çevrimiçi",
+      back: "← Geri"
+    },
+    userProfile: lang === "en" ? {
+      adventures: "Adventures",
+      level: "Level",
+      streak: "Best Streak",
+      days: "days",
+      posts: "Posts",
+      noPosts: "No posts yet",
+      sendMessage: "💬 Send Message",
+      back: "← Back"
+    } : {
+      adventures: "Macera",
+      level: "Seviye",
+      streak: "En İyi Seri",
+      days: "gün",
+      posts: "Paylaşımlar",
+      noPosts: "Henüz paylaşım yok",
+      sendMessage: "💬 Mesaj Gönder",
+      back: "← Geri"
+    },
+    notifications: lang === "en" ? {
+      enable: "🔔 Enable Notifications",
+      enabled: "Notifications On ✓",
+      denied: "Notifications blocked by browser",
+      daily: "Daily adventure reminder",
+      permission: "Allow notifications to get daily reminders"
+    } : {
+      enable: "🔔 Bildirimleri Aç",
+      enabled: "Bildirimler Açık ✓",
+      denied: "Bildirimler tarayıcı tarafından engellendi",
+      daily: "Günlük macera hatırlatması",
+      permission: "Günlük hatırlatma almak için bildirimlere izin ver"
+    }
+  };
+}

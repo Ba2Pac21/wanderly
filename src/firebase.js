@@ -98,7 +98,7 @@ export async function updateUserProfile(uid, data) {
 }
 
 // --- POSTS ---
-export async function shareAdventure({ uid, username, displayName, avatar, title, category, note, photo, isLocation }) {
+export async function shareAdventure({ uid, username, displayName, avatar, title, category, note, photo, isLocation, placeName, placeLat, placeLon, placeCity }) {
   try {
     const photoData = photo && photo.length < 500000 ? photo : null;
     await addDoc(collection(db, "posts"), {
@@ -107,6 +107,10 @@ export async function shareAdventure({ uid, username, displayName, avatar, title
       note: note || "",
       photo: photoData,
       isLocation: isLocation || false,
+      placeName: placeName || null,
+      placeLat: placeLat || null,
+      placeLon: placeLon || null,
+      placeCity: placeCity || null,
       likes: 0, likedBy: [],
       createdAt: serverTimestamp()
     });
@@ -190,23 +194,34 @@ export async function sendMessage(convId, { uid, text }) {
     });
     await updateDoc(doc(db, "conversations", convId), { lastMessage: text, lastMessageAt: serverTimestamp() });
     return true;
-  } catch { return false; }
+  } catch (e) { console.error("sendMessage error:", e); return false; }
 }
 
 export async function getMessages(convId, maxMessages = 50) {
   try {
-    const q = query(collection(db, "conversations", convId, "messages"), orderBy("createdAt", "asc"), limit(maxMessages));
-    const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch { return []; }
+    const snap = await getDocs(collection(db, "conversations", convId, "messages"));
+    const msgs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    msgs.sort((a, b) => {
+      const ta = a.createdAt?.toDate?.() || new Date(0);
+      const tb = b.createdAt?.toDate?.() || new Date(0);
+      return ta - tb;
+    });
+    return msgs.slice(-maxMessages);
+  } catch (e) { console.error("getMessages error:", e); return []; }
 }
 
 export async function getConversations(uid) {
   try {
-    const q = query(collection(db, "conversations"), where("participants", "array-contains", uid), orderBy("lastMessageAt", "desc"));
+    const q = query(collection(db, "conversations"), where("participants", "array-contains", uid));
     const snap = await getDocs(q);
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  } catch { return []; }
+    const convs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    convs.sort((a, b) => {
+      const ta = a.lastMessageAt?.toDate?.() || new Date(0);
+      const tb = b.lastMessageAt?.toDate?.() || new Date(0);
+      return tb - ta;
+    });
+    return convs;
+  } catch (e) { console.error("getConversations error:", e); return []; }
 }
 
 export async function getUserProfileByUsername(username) {

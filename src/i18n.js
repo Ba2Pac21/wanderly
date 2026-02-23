@@ -105,3 +105,57 @@ export function addTranslations(lang) {
     }
   };
 }
+
+export function friendTranslations(lang) {
+  return lang === "en" ? {
+    friends: "Friends",
+    messages: "Messages", 
+    requests: "Requests",
+    addFriend: "Add Friend",
+    searchPlaceholder: "Search username...",
+    search: "Search",
+    sendRequest: "Add",
+    requestSent: "Sent ✓",
+    alreadyFriends: "Already friends",
+    pending: "Pending",
+    accept: "Accept",
+    reject: "Decline",
+    remove: "Remove",
+    removeFriend: "Remove this friend?",
+    noFriends: "No friends yet",
+    noFriendsSub: "Search by username to add friends!",
+    noRequests: "No pending requests",
+    incomingRequests: "Friend Requests",
+    sentRequests: "Sent Requests",
+    friendAdded: "Friend added!",
+    requestSentMsg: "Request sent!",
+    userNotFound: "User not found",
+    cantAddSelf: "Can't add yourself",
+    startChat: "Message"
+  } : {
+    friends: "Arkadaşlar",
+    messages: "Mesajlar",
+    requests: "İstekler",
+    addFriend: "Arkadaş Ekle",
+    searchPlaceholder: "Kullanıcı adı ara...",
+    search: "Ara",
+    sendRequest: "Ekle",
+    requestSent: "Gönderildi ✓",
+    alreadyFriends: "Zaten arkadaş",
+    pending: "Bekliyor",
+    accept: "Kabul Et",
+    reject: "Reddet",
+    remove: "Kaldır",
+    removeFriend: "Bu arkadaşı kaldırmak istediğine emin misin?",
+    noFriends: "Henüz arkadaş yok",
+    noFriendsSub: "Kullanıcı adı ile arkadaş ekle!",
+    noRequests: "Bekleyen istek yok",
+    incomingRequests: "Arkadaşlık İstekleri",
+    sentRequests: "Gönderilen İstekler",
+    friendAdded: "Arkadaş eklendi!",
+    requestSentMsg: "İstek gönderildi!",
+    userNotFound: "Kullanıcı bulunamadı",
+    cantAddSelf: "Kendini ekleyemezsin",
+    startChat: "Mesaj"
+  };
+}

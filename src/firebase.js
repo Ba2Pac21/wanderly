@@ -225,3 +225,76 @@ export async function getUserPosts(uid, maxPosts = 20) {
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch { return []; }
 }
+
+// --- FRIEND SYSTEM ---
+export async function sendFriendRequest(fromUid, toUid) {
+  try {
+    const reqId = [fromUid, toUid].sort().join("_");
+    const reqRef = doc(db, "friendRequests", reqId);
+    const snap = await getDoc(reqRef);
+    if (snap.exists()) return { error: "already_sent" };
+    // Check if already friends
+    const friendRef = doc(db, "friends", reqId);
+    const friendSnap = await getDoc(friendRef);
+    if (friendSnap.exists()) return { error: "already_friends" };
+    await setDoc(reqRef, { from: fromUid, to: toUid, status: "pending", createdAt: serverTimestamp() });
+    return { success: true };
+  } catch (e) { return { error: e.message }; }
+}
+
+export async function getPendingRequests(uid) {
+  try {
+    const q = query(collection(db, "friendRequests"), where("to", "==", uid), where("status", "==", "pending"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch { return []; }
+}
+
+export async function getSentRequests(uid) {
+  try {
+    const q = query(collection(db, "friendRequests"), where("from", "==", uid), where("status", "==", "pending"));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch { return []; }
+}
+
+export async function acceptFriendRequest(reqId, fromUid, toUid) {
+  try {
+    const friendId = [fromUid, toUid].sort().join("_");
+    await setDoc(doc(db, "friends", friendId), { users: [fromUid, toUid], createdAt: serverTimestamp() });
+    await updateDoc(doc(db, "friendRequests", reqId), { status: "accepted" });
+    return { success: true };
+  } catch (e) { return { error: e.message }; }
+}
+
+export async function rejectFriendRequest(reqId) {
+  try {
+    await updateDoc(doc(db, "friendRequests", reqId), { status: "rejected" });
+    return { success: true };
+  } catch (e) { return { error: e.message }; }
+}
+
+export async function removeFriend(uid1, uid2) {
+  try {
+    const friendId = [uid1, uid2].sort().join("_");
+    await deleteDoc(doc(db, "friends", friendId));
+    return { success: true };
+  } catch (e) { return { error: e.message }; }
+}
+
+export async function getFriends(uid) {
+  try {
+    const q = query(collection(db, "friends"), where("users", "array-contains", uid));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch { return []; }
+}
+
+export async function searchUsers(searchTerm, maxResults = 10) {
+  try {
+    const lower = searchTerm.toLowerCase();
+    const q = query(collection(db, "users"), where("usernameLower", ">=", lower), where("usernameLower", "<=", lower + "\uf8ff"), limit(maxResults));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  } catch { return []; }
+}

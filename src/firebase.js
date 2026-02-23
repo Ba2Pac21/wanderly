@@ -178,13 +178,10 @@ export async function deletePost(postId) {
 export async function getOrCreateConversation(uid1, uid2) {
   try {
     const convId = [uid1, uid2].sort().join("_");
-    const convRef = doc(db, "conversations", convId);
-    const snap = await getDoc(convRef);
-    if (!snap.exists()) {
-      await setDoc(convRef, { participants: [uid1, uid2], createdAt: serverTimestamp(), lastMessage: null, lastMessageAt: serverTimestamp() });
-    }
+    // Use setDoc with merge to create if not exists, or leave existing
+    await setDoc(doc(db, "conversations", convId), { participants: [uid1, uid2], lastMessageAt: serverTimestamp() }, { merge: true });
     return convId;
-  } catch { return null; }
+  } catch (e) { console.error("getOrCreateConversation error:", e); return null; }
 }
 
 export async function sendMessage(convId, { uid, text }) {
